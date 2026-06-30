@@ -1,0 +1,15 @@
+# Ambiente
+.venv/
+__pycache__/
+*.pyc
+
+# Segredos e logs
+.env
+logs/
+
+# Caches de teste/ferramentas
+.pytest_cache/
+.ruff_cache/
+
+# Modelos baixados em runtime (RapidOCR/Whisper)
+*.onnx

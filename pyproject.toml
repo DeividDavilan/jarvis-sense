@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "jarvis-sense"
+version = "0.1.0"
+description = "Camada de percepção (voz, áudio, visão) do Jarvis — roda no Windows Terminal e comanda o Jarvis web sem alterá-lo."
+requires-python = ">=3.11"
+
+[tool.setuptools.packages.find]
+include = ["jarvis_sense*"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["jarvis_sense"]
+python_files = ["test_*.py"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"

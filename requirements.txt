@@ -1,0 +1,49 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Jarvis Sense — dependências (todas gratuitas)
+#
+# Instale o núcleo com:   pip install -r requirements.txt
+# Os "extras" estão comentados por módulo: descomente conforme for ativando a
+# fase correspondente. Isso mantém a instalação base leve e evita travar em
+# bibliotecas nativas que você ainda não vai usar.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# --- Núcleo (Fase 0) -----------------------------------------------------------
+pydantic>=2.6
+pydantic-settings>=2.2
+python-dotenv>=1.0
+
+# --- Cérebro / LLM (Fase 3) ----------------------------------------------------
+groq>=0.11            # padrão (gratuito, usa a sua GROQ_API_KEY)
+anthropic>=0.40       # fallback opcional (claude-opus-4-8)
+httpx>=0.27           # cliente HTTP p/ as APIs existentes do Jarvis
+
+# --- Ponte WebSocket (Fase 6) --------------------------------------------------
+websockets>=12.0
+
+# --- Voz do Jarvis · TTS (Fase 1) ----------------------------------------------
+edge-tts>=6.1         # voz neural gratuita (padrão)
+# pyttsx3>=2.90       # voz offline SAPI (fallback). Descomente p/ usar.
+
+# --- Microfone + STT (Fase 2) --------------------------------------------------
+# sounddevice>=0.4.6  # captura de microfone (obrigatório para o mic)
+# numpy>=1.26         # buffers de áudio + VAD por energia (já vem com o OCR)
+# webrtcvad>=2.0.10   # VAD de alta qualidade (OPCIONAL). Sem wheel no Python 3.14;
+#                     # se não instalar, o sistema usa o VAD por energia (numpy).
+# faster-whisper>=1.0 # STT local offline (fallback do Groq Whisper)
+# openwakeword>=0.6.0 # wake word ACÚSTICA "hey jarvis" (usa o onnxruntime que já
+#                     # vem com o OCR). Sem ela, o modo de ativação cai para textual.
+#                     # 1ª vez: baixa os modelos (python -c "from openwakeword.utils
+#                     # import download_models; download_models()").
+
+# --- Áudio do sistema · loopback (Fase 5) --------------------------------------
+# PyAudioWPatch>=0.2.12  # WASAPI loopback no Windows
+
+# --- Tela + OCR (Fase 4) -------------------------------------------------------
+# mss>=9.0               # captura de tela rápida
+# Pillow>=10.0           # manipulação de imagem
+# rapidocr-onnxruntime>=1.3  # OCR primário (self-contained, ONNX)
+# pytesseract>=0.3.10    # OCR fallback (requer binário Tesseract no sistema)
+
+# --- Testes --------------------------------------------------------------------
+pytest>=8.0
+pytest-asyncio>=0.23
