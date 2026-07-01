@@ -26,6 +26,14 @@ from .vad import FRAME_BYTES, SAMPLE_RATE, Segmenter
 logger = get_logger("Speech")
 
 
+def _apply_gain(pcm: bytes, gain: float) -> bytes:
+    """Multiplica o PCM int16 por `gain`, saturando (clip) nos limites de 16 bits."""
+    import numpy as np
+
+    samples = np.frombuffer(pcm, dtype=np.int16).astype(np.float32) * gain
+    return np.clip(samples, -32768, 32767).astype(np.int16).tobytes()
+
+
 class MicrophoneSource(IAudioSource):
     """Microfone real com cancelamento de ruído via VAD e detecção de silêncio."""
 
@@ -118,11 +126,13 @@ class MicrophoneSource(IAudioSource):
 
         queue: asyncio.Queue[bytes] = asyncio.Queue()
         loop = asyncio.get_running_loop()
+        gain = self._settings.mic_gain
 
         def _callback(indata, _frames, _time, status) -> None:
             if status:
                 logger.debug("sounddevice status: %s", status)
-            loop.call_soon_threadsafe(queue.put_nowait, bytes(indata))
+            frame = _apply_gain(bytes(indata), gain) if gain != 1.0 else bytes(indata)
+            loop.call_soon_threadsafe(queue.put_nowait, frame)
 
         device = self._resolve_device(sd)
         self._sd = sd

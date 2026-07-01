@@ -66,6 +66,11 @@ class Settings(BaseSettings):
     # Windows (ex.: conectar um headset Bluetooth) sem reiniciar o processo.
     # Ex.: "soundcore" | "headset". Vazio = usa o padrão do sistema.
     mic_device_name: str = Field(default="", alias="JARVIS_MIC_DEVICE_NAME")
+    # Ganho de software aplicado ao PCM cru do microfone (1.0 = sem alteração).
+    # Alguns microfones internos captam muito baixo mesmo com o volume do
+    # Windows em 100% — apps de chamada (Zoom/Teams) compensam com AGC próprio;
+    # aqui é um ganho fixo simples. Amostras são "clipadas" para não estourar.
+    mic_gain: float = Field(default=1.0, alias="JARVIS_MIC_GAIN")
     wake_word: str = Field(default="jarvis", alias="JARVIS_WAKE_WORD")
     # Modo de ativação: "acoustic" (openWakeWord, gatilho antes do STT) ou "text"
     # (transcreve tudo e detecta "jarvis" no texto). Acoustic cai para text se
