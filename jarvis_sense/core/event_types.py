@@ -30,6 +30,7 @@ class EventName(str, Enum):
     JARVIS_SPEAKING = "OnJarvisSpeaking"
     MIC_STATE = "OnMicState"
     CONTROL_CMD = "OnControlCommand"
+    BRAIN_THINKING = "OnBrainThinking"
 
 
 @dataclass(frozen=True, slots=True)
@@ -122,6 +123,19 @@ class MicStateChanged(Event):
 
     name: ClassVar[EventName] = EventName.MIC_STATE
     state: str = "idle"
+
+
+@dataclass(frozen=True, slots=True)
+class BrainThinking(Event):
+    """O cérebro começou/terminou de consultar o LLM.
+
+    Usado para pausar o OCR/visão enquanto a LLM local (Ollama) roda — em CPUs
+    fracas, os dois competindo por núcleo pode desacelerar (ou travar) a
+    resposta do LLM.
+    """
+
+    name: ClassVar[EventName] = EventName.BRAIN_THINKING
+    thinking: bool = True
 
 
 @dataclass(frozen=True, slots=True)

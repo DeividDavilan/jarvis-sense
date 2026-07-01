@@ -20,7 +20,7 @@ from collections import deque
 
 from ..core.config import Settings, get_settings
 from ..core.errors import safe_async
-from ..core.event_types import ControlCommand, EventName
+from ..core.event_types import BrainThinking, ControlCommand, EventName
 from ..core.events import EventBus, get_event_bus
 from ..core.logging import get_logger
 from ..tts.services import TTSService
@@ -189,7 +189,11 @@ class BrainService:
             ChatMessage(role="system", content=system),
             *self._history,
         ]
-        reply = await self._complete_with_fallback(provider, messages)
+        await self._bus.publish(BrainThinking(thinking=True))
+        try:
+            reply = await self._complete_with_fallback(provider, messages)
+        finally:
+            await self._bus.publish(BrainThinking(thinking=False))
         if reply:
             self._history.append(ChatMessage(role="assistant", content=reply))
         logger.info("Resposta: %r", reply)

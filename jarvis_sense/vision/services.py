@@ -22,7 +22,7 @@ import asyncio
 
 from ..core.config import Settings, get_settings
 from ..core.errors import safe_async
-from ..core.event_types import ControlCommand, EventName, OCRFinished, ScreenChanged, VisionUpdated
+from ..core.event_types import BrainThinking, ControlCommand, EventName, OCRFinished, ScreenChanged, VisionUpdated
 from ..core.events import EventBus, get_event_bus
 from ..core.logging import get_logger
 from ..ocr.services import OcrService
@@ -59,7 +59,19 @@ class VisionService:
         self._differ = FrameDiffer()
         self._ocr_enabled = True
         self._vision_enabled = True
+        self._paused = False  # pausado enquanto o cérebro consulta a LLM local
         self._bus.subscribe(EventName.CONTROL_CMD, self._on_control)
+        self._bus.subscribe(EventName.BRAIN_THINKING, self._on_brain_thinking)
+
+    def _on_brain_thinking(self, event: BrainThinking) -> None:
+        # Em CPUs fracas, OCR + LLM local competindo por núcleo pode
+        # desacelerar (ou travar) a resposta do Ollama — pausa o tick
+        # enquanto o cérebro está consultando o LLM.
+        self._paused = event.thinking
+        if self._paused:
+            logger.debug("Visão pausada (cérebro consultando LLM).")
+        else:
+            logger.debug("Visão retomada.")
 
     def _on_control(self, event: ControlCommand) -> None:
         def _toggle(current: bool, action: str) -> bool:
@@ -95,6 +107,8 @@ class VisionService:
 
     @safe_async(module="Vision")
     async def _tick(self) -> None:
+        if self._paused:
+            return
         frame = await self._capture.grab(self._region)
         ratio = self._differ.diff_ratio(frame.signature)
         if ratio < CHANGE_THRESHOLD:
