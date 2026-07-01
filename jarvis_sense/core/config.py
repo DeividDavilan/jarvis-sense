@@ -37,12 +37,21 @@ class Settings(BaseSettings):
     groq_api_key: str | None = Field(default=None, alias="GROQ_API_KEY")
     groq_model: str = Field(default="llama-3.3-70b-versatile", alias="GROQ_MODEL")
     anthropic_api_key: str | None = Field(default=None, alias="ANTHROPIC_API_KEY")
+    # Ollama local (offline, gratuito). Servidor já roda em localhost:11434.
+    ollama_base_url: str = Field(default="http://localhost:11434", alias="JARVIS_OLLAMA_BASE_URL")
+    ollama_model: str = Field(default="gemma3:4b", alias="JARVIS_OLLAMA_MODEL")
+    # "groq" | "anthropic" | "ollama". Vazio = automático (Groq primeiro).
     llm_provider: str | None = Field(default=None, alias="JARVIS_LLM_PROVIDER")
 
     # --- TTS (voz do Jarvis) ---------------------------------------------------
     tts_engine: str = Field(default="edge", alias="JARVIS_TTS_ENGINE")
     tts_voice: str = Field(default="pt-BR-AntonioNeural", alias="JARVIS_TTS_VOICE")
     tts_rate: str = Field(default="+6%", alias="JARVIS_TTS_RATE")
+    # Trecho (case-insensitive) do nome do dispositivo de SAÍDA a usar em vez do
+    # padrão do Windows. O MCI/winmm (usado p/ tocar o MP3 do edge-tts) sofre do
+    # mesmo problema do PortAudio: não atualiza o "padrão" após trocar p/ um
+    # headset Bluetooth sem reiniciar o processo. Vazio = padrão do sistema.
+    speaker_device_name: str = Field(default="", alias="JARVIS_SPEAKER_DEVICE_NAME")
 
     # --- STT (voz do usuário) --------------------------------------------------
     stt_engine: str = Field(default="groq", alias="JARVIS_STT_ENGINE")
@@ -51,6 +60,12 @@ class Settings(BaseSettings):
     # Pasta onde os pesos do faster-whisper são baixados (mantém fora do C:).
     stt_local_model_dir: str = Field(default="D:/models/whisper", alias="JARVIS_STT_LOCAL_MODEL_DIR")
     stt_language: str = Field(default="pt", alias="JARVIS_STT_LANGUAGE")
+    # Trecho (case-insensitive) do nome do dispositivo de entrada a usar em vez
+    # do padrão do Windows. Necessário porque o PortAudio (sounddevice) às vezes
+    # não atualiza o "dispositivo padrão" depois de trocar o áudio padrão do
+    # Windows (ex.: conectar um headset Bluetooth) sem reiniciar o processo.
+    # Ex.: "soundcore" | "headset". Vazio = usa o padrão do sistema.
+    mic_device_name: str = Field(default="", alias="JARVIS_MIC_DEVICE_NAME")
     wake_word: str = Field(default="jarvis", alias="JARVIS_WAKE_WORD")
     # Modo de ativação: "acoustic" (openWakeWord, gatilho antes do STT) ou "text"
     # (transcreve tudo e detecta "jarvis" no texto). Acoustic cai para text se

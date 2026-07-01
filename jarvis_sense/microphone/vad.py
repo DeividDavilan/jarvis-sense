@@ -46,7 +46,7 @@ class _EnergyDetector:
     ao ambiente, tolerando ruído constante.
     """
 
-    def __init__(self, margin: float = 2.5, floor_start: float = 250.0) -> None:
+    def __init__(self, margin: float = 1.5, floor_start: float = 100.0) -> None:
         self._margin = margin
         self._floor = floor_start  # piso de ruído (RMS) estimado
 

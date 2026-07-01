@@ -22,10 +22,13 @@ websockets>=12.0
 
 # --- Voz do Jarvis · TTS (Fase 1) ----------------------------------------------
 edge-tts>=6.1         # voz neural gratuita (padrão)
+av>=13.0               # decodifica o MP3 do edge-tts p/ tocar via sounddevice
+                        # (escolhe o dispositivo de saída por nome, ver
+                        # JARVIS_SPEAKER_DEVICE_NAME no .env.example)
 # pyttsx3>=2.90       # voz offline SAPI (fallback). Descomente p/ usar.
 
 # --- Microfone + STT (Fase 2) --------------------------------------------------
-sounddevice>=0.4.6  # captura de microfone (obrigatório para o mic)
+sounddevice>=0.4.6  # captura de microfone (obrigatório para o mic) e reprodução de TTS
 numpy>=1.26         # buffers de áudio + VAD por energia (já vem com o OCR)
 # webrtcvad>=2.0.10   # VAD de alta qualidade (OPCIONAL). Sem wheel no Python 3.14;
 #                     # se não instalar, o sistema usa o VAD por energia (numpy).

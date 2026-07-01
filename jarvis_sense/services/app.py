@@ -85,6 +85,8 @@ class JarvisSenseApp:
 
     def _profile(self) -> str:
         parts = []
+        if (self.settings.llm_provider or "").lower() == "ollama":
+            parts.append("ollama")
         if self.settings.has_groq:
             parts.append("groq")
         if self.settings.has_anthropic:
