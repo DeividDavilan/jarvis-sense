@@ -19,6 +19,8 @@ Assina `OnJarvisSpeaking` para silenciar o microfone enquanto o Jarvis fala
 
 from __future__ import annotations
 
+import asyncio
+
 from ..core.config import Settings, get_settings
 from ..core.errors import safe_async
 from ..core.event_types import ControlCommand, EventName, MicStateChanged, SpeechDetected
@@ -99,6 +101,18 @@ class VoiceInputService:
         logger.info("STT ativo: %s", self._active_stt.name)
         return self._active_stt
 
+    async def _warm_up_stt(self) -> None:
+        """Pré-carrega o modelo do STT local em paralelo, assim que o serviço
+        sobe — sem isso, o *primeiro* comando de verdade paga o custo de
+        carregar o faster-whisper (observado levando 30-40s), o que já fez a
+        janela de conversa do `BrainService` expirar e descartar o comando
+        em silêncio antes desta correção."""
+        stt = await self._resolve_stt()
+        ensure_model = getattr(stt, "_ensure_model", None)
+        if callable(ensure_model):
+            await asyncio.to_thread(ensure_model)
+            logger.info("STT local pré-carregado.")
+
     async def run(self) -> None:
         """Escolhe o modo de ativação e roda o laço correspondente."""
         if not await self._source.is_available():
@@ -110,6 +124,7 @@ class VoiceInputService:
             return
 
         await self._bus.publish(MicStateChanged(state="idle"))
+        asyncio.create_task(self._warm_up_stt())
 
         if (self._settings.wake_mode or "text").lower() == "acoustic":
             if await self._wake_acoustic.is_available():

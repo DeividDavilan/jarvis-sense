@@ -30,12 +30,12 @@ from .models import JARVIS_SYSTEM_PROMPT, ChatMessage
 
 logger = get_logger("Brain")
 
-AWAKE_WINDOW_S = 30.0  # tempo que o Jarvis fica aguardando comando sem wake word
-# 30s (não 12s) porque a janela começa a contar no instante do wake, mas o
-# comando só chega aqui depois do "Sim, senhor?" falado + VAD + STT — e o
-# faster-whisper local pode levar >10s só para carregar o modelo na primeira
-# vez. Uma janela curta descartava o primeiro comando em silêncio (sem log
-# nem resposta) sempre que o STT local ainda estava "frio".
+AWAKE_WINDOW_S = 60.0  # tempo que o Jarvis fica aguardando comando sem wake word
+# 60s porque a janela começa a contar no instante do wake, mas o comando só
+# chega aqui depois do "Sim, senhor?" falado + VAD + STT — e o faster-whisper
+# local pode levar 30-40s pra carregar o modelo + transcrever na primeira vez
+# de um processo novo (observado ao vivo). Um valor curto descartava o
+# primeiro comando em silêncio (sem log nem resposta) com o STT "frio".
 HISTORY_TURNS = 6      # pares usuário/assistente mantidos como contexto
 
 
