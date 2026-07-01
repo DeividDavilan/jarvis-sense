@@ -180,8 +180,25 @@ class BrainService:
             ChatMessage(role="system", content=system),
             *self._history,
         ]
-        reply = await provider.complete(messages)
+        reply = await self._complete_with_fallback(provider, messages)
         if reply:
             self._history.append(ChatMessage(role="assistant", content=reply))
         logger.info("Resposta: %r", reply)
         return reply
+
+    async def _complete_with_fallback(self, provider: ILLMProvider, messages: list[ChatMessage]) -> str:
+        """Nunca deixa o Jarvis "mudo": se o provedor ativo falhar (travar,
+        cair), tenta uma vez o outro provedor configurado antes de desistir
+        com uma resposta falada de erro (em vez de nenhuma resposta)."""
+        try:
+            return await provider.complete(messages)
+        except Exception as exc:  # noqa: BLE001 — qualquer falha de provedor
+            other = self._fallback if provider is self._primary else self._primary
+            logger.warning("Provedor '%s' falhou (%s); tentando '%s'.", provider.name, exc, other.name)
+            try:
+                reply = await other.complete(messages)
+                self._active = other  # a falha indica que o outro é mais confiável agora
+                return reply
+            except Exception as exc2:  # noqa: BLE001
+                logger.error("Provedor de fallback '%s' também falhou: %s", other.name, exc2)
+                return "Desculpe, senhor, os provedores de IA estão indisponíveis no momento."
