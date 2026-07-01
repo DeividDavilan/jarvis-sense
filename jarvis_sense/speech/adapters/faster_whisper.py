@@ -42,7 +42,10 @@ class FasterWhisperSTT:
                 raise EngineUnavailableError("Pacote 'faster-whisper' não instalado.") from exc
             logger.info("Carregando modelo faster-whisper '%s'…", self._settings.stt_local_model)
             self._model = WhisperModel(
-                self._settings.stt_local_model, device="auto", compute_type="int8"
+                self._settings.stt_local_model,
+                device="auto",
+                compute_type="int8",
+                download_root=self._settings.stt_local_model_dir,
             )
         return self._model
 

@@ -48,6 +48,8 @@ class Settings(BaseSettings):
     stt_engine: str = Field(default="groq", alias="JARVIS_STT_ENGINE")
     stt_groq_model: str = Field(default="whisper-large-v3-turbo", alias="JARVIS_STT_GROQ_MODEL")
     stt_local_model: str = Field(default="base", alias="JARVIS_STT_LOCAL_MODEL")
+    # Pasta onde os pesos do faster-whisper são baixados (mantém fora do C:).
+    stt_local_model_dir: str = Field(default="D:/models/whisper", alias="JARVIS_STT_LOCAL_MODEL_DIR")
     stt_language: str = Field(default="pt", alias="JARVIS_STT_LANGUAGE")
     wake_word: str = Field(default="jarvis", alias="JARVIS_WAKE_WORD")
     # Modo de ativação: "acoustic" (openWakeWord, gatilho antes do STT) ou "text"

@@ -51,10 +51,13 @@ Camada de **percepção nativa** do [J.A.R.V.I.S. Command Center](https://github
 
 **Pré-requisitos:** Python 3.11+ · Windows 10/11
 
+> O venv e os pesos de modelos (Whisper, etc.) ficam no **D:**, não no C: (pouco
+> espaço livre no disco do sistema).
+
 ```bash
 cd jarvis-sense
-python -m venv .venv
-.venv\Scripts\activate
+python -m venv D:\venvs\jarvis-sense
+D:\venvs\jarvis-sense\Scripts\activate
 pip install -r requirements.txt
 copy .env.example .env   # cole sua GROQ_API_KEY
 ```
