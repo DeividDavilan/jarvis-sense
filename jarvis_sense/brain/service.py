@@ -62,11 +62,13 @@ class BrainService:
         self._history: deque[ChatMessage] = deque(maxlen=HISTORY_TURNS * 2)
         self._awake_until = 0.0
         self._screen_context: str = ""
+        self._screen_text: str = ""  # texto cru do OCR, sem depender da visão LLM
         self._loopback_react = self._settings.loopback_react
         self._vision_react = self._settings.vision_react
 
         self._bus.subscribe(EventName.SPEECH_DETECTED, self._on_speech)
         self._bus.subscribe(EventName.VISION_UPDATED, self._on_vision)
+        self._bus.subscribe(EventName.OCR_FINISHED, self._on_ocr)
         self._bus.subscribe(EventName.AUDIO_CAPTURED, self._on_system_audio)
         self._bus.subscribe(EventName.CONTROL_CMD, self._on_control)
 
@@ -108,6 +110,11 @@ class BrainService:
             )
             if reply:
                 await self._tts.speak(reply)
+
+    # --- OCR cru → contexto (funciona mesmo com a visão LLM desligada) --------
+    def _on_ocr(self, event) -> None:  # noqa: ANN001
+        if event.text:
+            self._screen_text = event.text
 
     # --- áudio do sistema → contexto ------------------------------------------
     @safe_async(module="Brain")
@@ -182,6 +189,11 @@ class BrainService:
         system = JARVIS_SYSTEM_PROMPT
         if self._screen_context:
             system += f"\n\nContexto atual da tela: {self._screen_context}"
+        elif self._screen_text:
+            # Sem a visão LLM ativa, ainda dá pro cérebro responder "o que você
+            # está vendo?" com o texto cru do OCR (truncado — cada token conta
+            # numa CPU fraca, e o objetivo é dar contexto, não o texto todo).
+            system += f"\n\nTexto lido da tela agora (OCR): {self._screen_text[:600]}"
         if extra_system:
             system += f"\n\n{extra_system}"
 
