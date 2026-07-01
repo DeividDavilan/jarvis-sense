@@ -30,7 +30,12 @@ from .models import JARVIS_SYSTEM_PROMPT, ChatMessage
 
 logger = get_logger("Brain")
 
-AWAKE_WINDOW_S = 12.0  # tempo que o Jarvis fica aguardando comando sem wake word
+AWAKE_WINDOW_S = 30.0  # tempo que o Jarvis fica aguardando comando sem wake word
+# 30s (não 12s) porque a janela começa a contar no instante do wake, mas o
+# comando só chega aqui depois do "Sim, senhor?" falado + VAD + STT — e o
+# faster-whisper local pode levar >10s só para carregar o modelo na primeira
+# vez. Uma janela curta descartava o primeiro comando em silêncio (sem log
+# nem resposta) sempre que o STT local ainda estava "frio".
 HISTORY_TURNS = 6      # pares usuário/assistente mantidos como contexto
 
 
@@ -127,6 +132,10 @@ class BrainService:
         awake = now < self._awake_until
 
         if not event.wake and not awake:
+            logger.warning(
+                "Comando ignorado (%r): fora da janela de conversa (%.1fs após o wake).",
+                event.text, now - self._awake_until + AWAKE_WINDOW_S,
+            )
             return  # ignora fala sem wake word fora da janela de conversa
 
         command = event.text.strip()
